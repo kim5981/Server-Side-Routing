@@ -26,8 +26,26 @@ router.get("/", (req, res) => {
 //* GET /api/posts/:id
 // if !id error: 404 { message: "The post with the specified ID does not exist" }
 // if error retrieving post error: 500 { message: "The post information could not be retrieved" }
-router.get("/", (req, res) => {
-    
+router.get("/:id", async (req, res) => {
+    try {
+        const id = req.params.id
+        const post = await Posts.findById(id)
+        if (!post) {
+            res.status(404).json({
+                message: "The post with the specified ID does not exist"
+            })
+        } else {
+            res.json(post)
+        }
+    } catch (err) {
+        res.status(500).json({
+            message: "The post information could not be retrieved"
+        })
+        console.log({
+            err: err.message,
+            stack: err.stack
+        })
+    }
 })
 
 
