@@ -5,11 +5,14 @@ const server = express();
 // require your posts router and connect it here
 server.use(express.json());
 
-// plug in server
+const postsRouter = require("./posts/posts-router")
+server.use("/api/posts", postsRouter)
+
 server.use("*", (req, res) => {
-    res.status(404).json({
-        message: "um you did smth wrong.."
+    res.status(404).body({
+        message: "not here :("
     })
 })
+
 
 module.exports = server;
