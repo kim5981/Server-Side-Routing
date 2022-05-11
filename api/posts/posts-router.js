@@ -5,7 +5,6 @@ const Posts = require("./posts-model");
 const router = express.Router();
 
 //* GET /api/posts
-// error: 500 { message: "The posts information could not be retrieved" }
 router.get("/", (req, res) => {
     Posts.find()
         .then(post => {
@@ -24,8 +23,6 @@ router.get("/", (req, res) => {
 
 
 //* GET /api/posts/:id
-// if !id error: 404 { message: "The post with the specified ID does not exist" }
-// if error retrieving post error: 500 { message: "The post information could not be retrieved" }
 router.get("/:id", async (req, res) => {
     try {
         const id = req.params.id
@@ -75,8 +72,43 @@ router.post("/", (req, res) => {
 })
 
 //* PUT /api/posts/:id
-router.put("/api/posts/:id", (req, res) => {
-    
+router.put("/:id", (req, res) => {
+    const { title, contents } = req.body
+    if( !title || !contents ) {
+        res.status(400).json({
+            message: "Please provide title and contents for the post"
+        })
+    } else {
+        Posts.findById(req.params.id)
+        .then(smth => {
+            if( !smth ) {
+                res.status(404).json({
+                    message: "The post with the specified ID does not exist"
+                })
+            } else {
+                // req.body is verified and id exists
+                return Posts.update(req.params.id, req.body)
+            }
+        }) // argument in .then vv is w/e resolves from Posts.update() ^^ promise  
+        .then( data => {
+            // data resolves to # of records that were updated
+            if (data) {
+                return Posts.findById(req.params.id)
+            }
+        })
+        .then(post => {
+            if (post) {
+                res.json(post)
+            }
+        })
+        .catch(err => {
+            res.status(500).json({
+                message: "The post information could not be modified",
+                err: err.message,
+                stack: err.stack
+            })
+        })
+    }
 })
 
 
@@ -102,7 +134,7 @@ router.delete("/:id", async (req, res) => {
 })
 
 //* GET /api/posts/:id/comments
-router.get("/api/posts/:id/comments", (req, res) => {
+router.get("/:id/comments", (req, res) => {
     
 })
 
